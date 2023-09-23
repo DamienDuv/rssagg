@@ -1,0 +1,7 @@
+-- +goose Up
+
+ALTER TABLE users ADD CONSTRAINT NO_EMPTY_NAME CHECK (name<>'');
+
+-- +goose Down
+
+ALTER TABLE users DROP CONSTRAINT NO_EMPTY_NAME;
