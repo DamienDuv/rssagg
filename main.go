@@ -5,7 +5,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/DamienDuv/rssagg/internal"
 	"github.com/DamienDuv/rssagg/internal/database"
 	"github.com/DamienDuv/rssagg/internal/handlers"
 	"github.com/go-chi/chi"
@@ -40,6 +42,8 @@ func main() {
 		DB: database.New(dbConnection),
 	}
 
+	go internal.StartScraping(apiCfg.DB, 10, time.Minute * 1)
+
 	router := chi.NewRouter()
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins: []string{"http://*", "https://*"},
@@ -53,8 +57,16 @@ func main() {
 	v1Router := chi.NewRouter()
 	v1Router.Get("/healthz", handlers.HandlerReadiness)
 	v1Router.Get("/error", handlers.HandlerError)
+
 	v1Router.Post("/users", apiCfg.HandlerCreateUser)
-	v1Router.Get("/users", apiCfg.HandlerGetUserByAPIKey)
+	v1Router.Get("/users", apiCfg.MiddlewareAuth(apiCfg.HandlerGetUser))
+
+	v1Router.Post("/feeds", apiCfg.MiddlewareAuth(apiCfg.HandlerCreateFeed))
+	v1Router.Get("/feeds", apiCfg.HandlerGetFeeds)
+
+	v1Router.Post("/feed_follows", apiCfg.MiddlewareAuth(apiCfg.HandlerCreateFeedFollow))
+	v1Router.Get("/feed_follows", apiCfg.MiddlewareAuth(apiCfg.HandlerGetFeedFollows))
+	v1Router.Delete("/feed_follows/{feedFollowID}", apiCfg.MiddlewareAuth(apiCfg.HandlerDeleteFeedFollow))
 
 	router.Mount("/v1", v1Router)
 

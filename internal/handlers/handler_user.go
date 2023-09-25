@@ -6,9 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/DamienDuv/rssagg/internal/auth"
 	"github.com/DamienDuv/rssagg/internal/database"
-	"github.com/DamienDuv/rssagg/internal/models"
 	"github.com/google/uuid"
 )
 
@@ -37,22 +35,9 @@ func (apiCfg *ApiConfig) HandlerCreateUser(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	respondWithJSON(w, 201, models.DatabaseUserToUser(user))
+	respondWithJSON(w, 201, user)
 }
 
-func (apiCfg *ApiConfig) HandlerGetUserByAPIKey(w http.ResponseWriter, r *http.Request) {
-	
-	apiKey, err := auth.GetAPIKey(r.Header)
-	if err != nil {
-		respondWithError(w, 403, fmt.Sprintf("Auth error: %v", err))
-		return
-	}
-
-	user, err := apiCfg.DB.GetUserByAPIKey(r.Context(), apiKey)
-	if err != nil {
-		respondWithError(w, 400, fmt.Sprintf("Couldn't get user: %v", err))
-		return
-	}
-
-	respondWithJSON(w, 200, models.DatabaseUserToUser(user))
+func (apiCfg *ApiConfig) HandlerGetUser(w http.ResponseWriter, r *http.Request, user database.User) {
+	respondWithJSON(w, 200, user)
 }
