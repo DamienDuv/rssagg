@@ -44,6 +44,7 @@ func (s *Server) StartListening(portString string) error {
 
 	v1Router.Post("/users", s.HandlerCreateUser)
 	v1Router.Get("/users", s.MiddlewareAuth(s.HandlerGetUser))
+	v1Router.Get("/users/posts", s.MiddlewareAuth(s.handlerGetPostsForUser))
 
 	v1Router.Post("/feeds", s.MiddlewareAuth(s.HandlerCreateFeed))
 	v1Router.Get("/feeds", s.HandlerGetFeeds)

@@ -41,3 +41,29 @@ func (server *Server) HandlerCreateUser(w http.ResponseWriter, r *http.Request) 
 func (server *Server) HandlerGetUser(w http.ResponseWriter, r *http.Request, user database.User) {
 	respondWithJSON(w, 200, user)
 }
+
+func (server *Server) handlerGetPostsForUser(w http.ResponseWriter, r *http.Request, user database.User) {
+	type parameters struct {
+		Limit int `json:"limit"`
+	}
+	decoder := json.NewDecoder(r.Body)
+
+	params := parameters{}
+	err := decoder.Decode(&params)
+	if err != nil {
+		respondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
+		return
+	}
+
+	posts, err := server.DB.GetPostsForUser(r.Context(), database.GetPostsForUserParams{
+		UserID: user.ID,
+		Limit: int32(params.Limit),
+	})
+
+	if err != nil {
+		respondWithError(w, 400, fmt.Sprintf("Couldn't read user's posts: %v",err))
+		return
+	}
+
+	respondWithJSON(w, 200, posts)
+}

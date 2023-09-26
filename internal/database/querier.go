@@ -6,7 +6,6 @@ package database
 
 import (
 	"context"
-
 	"github.com/google/uuid"
 )
 
@@ -19,6 +18,7 @@ type Querier interface {
 	GetFeedFollows(ctx context.Context, userID uuid.UUID) ([]FeedFollow, error)
 	GetFeeds(ctx context.Context) ([]Feed, error)
 	GetNextFeedsToFetch(ctx context.Context, limit int32) ([]Feed, error)
+	GetPostsForUser(ctx context.Context, arg GetPostsForUserParams) ([]Post, error)
 	GetUserByAPIKey(ctx context.Context, apiKey string) (User, error)
 	MarkFeedAsFetched(ctx context.Context, id uuid.UUID) (Feed, error)
 }
